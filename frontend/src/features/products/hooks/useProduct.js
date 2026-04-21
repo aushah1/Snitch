@@ -7,8 +7,14 @@ import {
   getProductDetails,
   addProductVariant,
   searchProducts,
+  getSimilarProducts,
 } from "../services/product.api";
-import { setSellerProducts, setProducts, setLoading } from "../product.slice";
+import {
+  setSellerProducts,
+  setProducts,
+  setLoading,
+  setSimilarProducts,
+} from "../product.slice";
 
 export const useProduct = () => {
   const dispatch = useDispatch();
@@ -87,11 +93,26 @@ export const useProduct = () => {
   const handleSearchProducts = useCallback(async (query) => {
     try {
       dispatch(setLoading(true));
-      const products = await searchProducts(query);
-      dispatch(setProducts(products));
-      return products;
+      const data = await searchProducts(query);
+
+      dispatch(setProducts(data.products));
+      return data.products;
     } catch (error) {
       console.error("Error searching products:", error);
+    } finally {
+      dispatch(setLoading(false));
+    }
+  }, []);
+
+  const handleGetSimilarProducts = useCallback(async (productId) => {
+    try {
+      dispatch(setLoading(true));
+      const data = await getSimilarProducts(productId);
+      dispatch(setSimilarProducts(data.similarProducts));
+
+      return data.similarProducts;
+    } catch (error) {
+      console.error("Error fetching similar products:", error);
     } finally {
       dispatch(setLoading(false));
     }
@@ -104,5 +125,6 @@ export const useProduct = () => {
     handleGetProductDetails,
     handleAddProductVariant,
     handleSearchProducts,
+    handleGetSimilarProducts,
   };
 };

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useProduct } from "../hooks/useProduct";
 import { useNavigate } from "react-router";
@@ -9,15 +9,15 @@ const Dashboard = () => {
   const sellerProducts = useSelector((state) => state.product.sellerProducts);
   const loading = useSelector((state) => state.auth.loading);
   const navigate = useNavigate();
-  const [selectedImage, setSelectedImage] = useState({});
+  // const [selectedImage, setSelectedImage] = useState({});
 
   useEffect(() => {
     handleGetSellerProducts();
   }, [handleGetSellerProducts]);
 
-  const handleImageChange = (productId, imageUrl) => {
-    setSelectedImage((prev) => ({ ...prev, [productId]: imageUrl }));
-  };
+  // const handleImageChange = (productId, imageUrl) => {
+  //   setSelectedImage((prev) => ({ ...prev, [productId]: imageUrl }));
+  // };
 
   const handleProductClick = (productId) => {
     navigate(`/seller/product/${productId}`);
@@ -25,12 +25,21 @@ const Dashboard = () => {
 
   // Stats calculations
   const totalPieces = sellerProducts.length;
-  const totalImages = sellerProducts.reduce((acc, p) => acc + (p.images?.length || 0), 0);
-  const avgPrice = totalPieces > 0
-    ? Math.round(sellerProducts.reduce((acc, p) => acc + (p.price?.amount || 0), 0) / totalPieces)
-    : 0;
+  const totalImages = sellerProducts.reduce(
+    (acc, p) => acc + (p.images?.length || 0),
+    0,
+  );
+  const avgPrice =
+    totalPieces > 0
+      ? Math.round(
+          sellerProducts.reduce((acc, p) => acc + (p.price?.amount || 0), 0) /
+            totalPieces,
+        )
+      : 0;
 
-  const currentMonth = new Date().toLocaleDateString("en-US", { month: "long" });
+  const currentMonth = new Date().toLocaleDateString("en-US", {
+    month: "long",
+  });
 
   return (
     <div className="min-h-screen bg-bg">
@@ -69,8 +78,8 @@ const Dashboard = () => {
                 Empty Atelier
               </p>
               <p className="text-sm text-outline mb-8 font-light leading-relaxed">
-                Your collection is empty. Begin your journey as an artisan
-                by creating your first piece.
+                Your collection is empty. Begin your journey as an artisan by
+                creating your first piece.
               </p>
               <button
                 onClick={() => navigate("/products/create")}
@@ -93,7 +102,14 @@ const Dashboard = () => {
                     </p>
                   </div>
                   <div className="w-10 h-10 rounded-full bg-surface-high flex items-center justify-center">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-outline">
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      className="text-outline">
                       <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
                     </svg>
                   </div>
@@ -118,7 +134,14 @@ const Dashboard = () => {
                     </p>
                   </div>
                   <div className="w-10 h-10 rounded-full bg-surface-high flex items-center justify-center">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-outline">
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      className="text-outline">
                       <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
                       <circle cx="8.5" cy="8.5" r="1.5" />
                       <polyline points="21 15 16 10 5 21" />
@@ -145,7 +168,14 @@ const Dashboard = () => {
                     </p>
                   </div>
                   <div className="w-10 h-10 rounded-full bg-surface-high flex items-center justify-center">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-outline">
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      className="text-outline">
                       <circle cx="12" cy="12" r="10" />
                       <path d="M12 6v12M8.5 9.5h7c1.1 0 2 .9 2 2s-.9 2-2 2h-7" />
                     </svg>
@@ -182,19 +212,29 @@ const Dashboard = () => {
                   {/* Header Row */}
                   <div className="grid grid-cols-12 gap-4 px-6 py-4 bg-surface-low">
                     <div className="col-span-1">
-                      <span className="label-atelier !mb-0 text-[0.6rem]">#</span>
+                      <span className="label-atelier !mb-0 text-[0.6rem]">
+                        #
+                      </span>
                     </div>
                     <div className="col-span-4">
-                      <span className="label-atelier !mb-0 text-[0.6rem]">Product</span>
+                      <span className="label-atelier !mb-0 text-[0.6rem]">
+                        Product
+                      </span>
                     </div>
                     <div className="col-span-3 hidden sm:block">
-                      <span className="label-atelier !mb-0 text-[0.6rem]">Date</span>
+                      <span className="label-atelier !mb-0 text-[0.6rem]">
+                        Date
+                      </span>
                     </div>
                     <div className="col-span-2">
-                      <span className="label-atelier !mb-0 text-[0.6rem]">Price</span>
+                      <span className="label-atelier !mb-0 text-[0.6rem]">
+                        Price
+                      </span>
                     </div>
                     <div className="col-span-2 text-right">
-                      <span className="label-atelier !mb-0 text-[0.6rem]">Action</span>
+                      <span className="label-atelier !mb-0 text-[0.6rem]">
+                        Action
+                      </span>
                     </div>
                   </div>
 
@@ -206,13 +246,17 @@ const Dashboard = () => {
                       onClick={() => handleProductClick(product._id)}>
                       <div className="col-span-1">
                         <span className="text-xs text-outline font-medium">
-                          {String(index + 1).padStart(2, '0')}
+                          {String(index + 1).padStart(2, "0")}
                         </span>
                       </div>
                       <div className="col-span-4 flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl overflow-hidden bg-surface-high shrink-0">
-                          {product.images?.[0]?.url ? (
-                            <img src={product.images[0].url} alt="" className="w-full h-full object-cover" />
+                          {product.variants[0].images[0].url ? (
+                            <img
+                              src={product.variants[0].images[0].url}
+                              alt=""
+                              className="w-full h-full object-cover"
+                            />
                           ) : (
                             <div className="w-full h-full bg-surface-high" />
                           )}
@@ -223,9 +267,14 @@ const Dashboard = () => {
                       </div>
                       <div className="col-span-3 hidden sm:block">
                         <span className="text-xs text-outline font-light">
-                          {new Date(product.createdAt).toLocaleDateString("en-US", {
-                            month: "short", day: "numeric", year: "numeric",
-                          })}
+                          {new Date(product.createdAt).toLocaleDateString(
+                            "en-US",
+                            {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            },
+                          )}
                         </span>
                       </div>
                       <div className="col-span-2">
@@ -235,7 +284,10 @@ const Dashboard = () => {
                       </div>
                       <div className="col-span-2 text-right">
                         <button
-                          onClick={(e) => { e.stopPropagation(); handleProductClick(product._id); }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleProductClick(product._id);
+                          }}
                           className="text-xs text-secondary font-medium hover:opacity-70 transition-opacity bg-transparent border-none cursor-pointer uppercase tracking-wider">
                           Manage
                         </button>
@@ -259,11 +311,17 @@ const Dashboard = () => {
                       onClick={() => handleProductClick(product._id)}>
                       <div className="flex items-center gap-4">
                         <div className="w-16 h-16 rounded-full overflow-hidden bg-surface-high shrink-0 img-zoom">
-                          {product.images?.[0]?.url ? (
-                            <img src={product.images[0].url} alt="" className="w-full h-full object-cover" />
+                          {product.variants[0].images?.[0]?.url ? (
+                            <img
+                              src={product.variants[0].images[0].url}
+                              alt=""
+                              className="w-full h-full object-cover"
+                            />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center">
-                              <span className="font-headline italic text-outline-variant text-xs">N/A</span>
+                              <span className="font-headline italic text-outline-variant text-xs">
+                                N/A
+                              </span>
                             </div>
                           )}
                         </div>
@@ -272,10 +330,21 @@ const Dashboard = () => {
                             {product.title}
                           </h3>
                           <p className="text-xs text-outline font-light mt-1">
-                            Inventory: <strong className="text-on-surface">{product.images?.length || 0}</strong> images
+                            Inventory:{" "}
+                            <strong className="text-on-surface">
+                              {product.images?.length || 0}
+                            </strong>{" "}
+                            images
                           </p>
                           <div className="flex items-center gap-1.5 mt-1.5">
-                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-secondary">
+                            <svg
+                              width="10"
+                              height="10"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              className="text-secondary">
                               <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
                               <polyline points="17 6 23 6 23 12" />
                             </svg>
@@ -302,10 +371,26 @@ const Dashboard = () => {
             <span className="font-light not-italic">elle</span>
           </span>
           <div className="flex items-center gap-6">
-            <a href="#" className="text-xs text-outline no-underline uppercase tracking-wider hover:text-secondary transition-colors">Privacy</a>
-            <a href="#" className="text-xs text-outline no-underline uppercase tracking-wider hover:text-secondary transition-colors">Terms</a>
-            <a href="#" className="text-xs text-outline no-underline uppercase tracking-wider hover:text-secondary transition-colors">Shipping</a>
-            <a href="#" className="text-xs text-outline no-underline uppercase tracking-wider hover:text-secondary transition-colors">Contact</a>
+            <a
+              href="#"
+              className="text-xs text-outline no-underline uppercase tracking-wider hover:text-secondary transition-colors">
+              Privacy
+            </a>
+            <a
+              href="#"
+              className="text-xs text-outline no-underline uppercase tracking-wider hover:text-secondary transition-colors">
+              Terms
+            </a>
+            <a
+              href="#"
+              className="text-xs text-outline no-underline uppercase tracking-wider hover:text-secondary transition-colors">
+              Shipping
+            </a>
+            <a
+              href="#"
+              className="text-xs text-outline no-underline uppercase tracking-wider hover:text-secondary transition-colors">
+              Contact
+            </a>
           </div>
           <p className="text-[0.6rem] text-outline uppercase tracking-[0.1em]">
             © 2024 MAISONelle. All rights reserved.

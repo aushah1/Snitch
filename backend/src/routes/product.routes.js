@@ -6,6 +6,7 @@ import {
   getSellerProducts,
   addProductVariant,
   searchProducts,
+  getSimilarProducts
 } from "../controllers/product.controllers.js";
 import { authenticateSeller } from "../middlewares/auth.middleware.js";
 import { createProductValidator } from "../validators/product.validator.js";
@@ -23,7 +24,7 @@ const productRouter = express.Router();
 
 productRouter.post(
   "/",
-  upload.array("images", 7),
+  upload.any(),
   authenticateSeller,
   createProductValidator,
   createProduct,
@@ -32,13 +33,15 @@ productRouter.post(
 productRouter.get("/", getAllProducts);
 productRouter.get("/seller", authenticateSeller, getSellerProducts);
 productRouter.get("/search", searchProducts);
+productRouter.get("/similar/:productId", getSimilarProducts);
 productRouter.get("/:id", getProductDetails);
 
 productRouter.post(
   "/:productId/variants",
   authenticateSeller,
-  upload.array("images", 7),
+  upload.any(),
   addProductVariant,
 );
+
 
 export default productRouter;

@@ -143,7 +143,11 @@ const SellerProductDetails = () => {
 
   const handleAttributeChange = (index, field, value) => {
     const updatedInputs = [...attributeInputs];
-    updatedInputs[index][field] = value;
+    if (field === "key" && value.length > 0) {
+      updatedInputs[index][field] = value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+    } else {
+      updatedInputs[index][field] = value;
+    }
     setAttributeInputs(updatedInputs);
 
     // Synchronize to object format
@@ -236,9 +240,10 @@ const SellerProductDetails = () => {
           <div className="w-full md:w-1/2">
             {/* Gallery placeholder */}
             <div className="w-full aspect-[4/5] bg-[#f5f3f0] overflow-hidden">
-              {product.images && product.images.length > 0 ? (
+              {product.variants[0].images &&
+              product.variants[0].images.length > 0 ? (
                 <img
-                  src={product.images[0].url}
+                  src={product.variants[0].images[0].url}
                   alt={product.title}
                   className="w-full h-full object-cover"
                 />

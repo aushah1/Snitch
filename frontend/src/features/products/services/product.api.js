@@ -46,24 +46,23 @@ export const getProductDetails = async (id) => {
 };
 
 export const addProductVariant = async (productId, variantData) => {
-
   try {
-    console.log("Adding variant with data:", variantData);       
+    console.log("Adding variant with data:", variantData);
     const formData = new FormData();
 
     // Add attributes
     formData.append("attributes", JSON.stringify(variantData.attributes));
 
     // Add stock
-    formData.append("stock", variantData.stock );
+    formData.append("stock", variantData.stock);
 
     // Add price
     formData.append("priceAmount", variantData.price.amount);
     formData.append("priceCurrency", variantData.price.currency);
 
-     variantData.images.forEach((image) => {
-        formData.append(`images`, image.file)
-    })
+    variantData.images.forEach((image) => {
+      formData.append(`images`, image.file);
+    });
 
     const response = await productApi.post(`/${productId}/variants`, formData);
     return response.data;
@@ -76,11 +75,22 @@ export const addProductVariant = async (productId, variantData) => {
 export const searchProducts = async (query) => {
   try {
     const response = await productApi.get(
-      `/search?q=${encodeURIComponent(query)}`,
+      `/search?query=${encodeURIComponent(query)}`,
     );
     return response.data;
   } catch (error) {
     console.error("Error searching products:", error);
+    throw error.response?.data || { message: "Server error" };
+  }
+};
+
+
+export const getSimilarProducts = async (productId) => {
+  try {
+    const response = await productApi.get(`/similar/${productId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching similar products:", error);
     throw error.response?.data || { message: "Server error" };
   }
 };

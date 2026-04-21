@@ -8,6 +8,7 @@ import ProductDetail from "../features/products/pages/ProductDetail";
 import Protected from "../features/auth/components/Protected";
 import SellerProductDetails from "../features/products/pages/SellerProductDetails";
 import Cart from "../features/cart/pages/Cart";
+import Collections from "../features/products/pages/Collections";
 
 export const routes = createBrowserRouter([
   {
@@ -53,5 +54,10 @@ export const routes = createBrowserRouter([
   {
     path: "/cart",
     element: <Cart />,
+  },
+
+  {
+    path: "/collections",
+    element: <Collections />,
   },
 ]);

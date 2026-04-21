@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router";
 import { useProduct } from "../hooks/useProduct";
@@ -17,8 +17,6 @@ const Home = () => {
   const { handleGetAllProducts } = useProduct();
   const products = useSelector((state) => state.product.products);
   const loading = useSelector((state) => state.product.loading);
-  const marqueeRef = useRef(null);
-
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -47,7 +45,7 @@ const Home = () => {
           <div className="pt-8 lg:pt-16">
             <div className="flex items-center gap-2 mb-8">
               <span className="w-2 h-2 rounded-full bg-secondary" />
-              <p className="label-atelier text-secondary !mb-0">
+              <p className="label-atelier text-secondary mb-0!">
                 SS '26 Collection
               </p>
             </div>
@@ -75,9 +73,7 @@ const Home = () => {
                 className="btn-pill btn-primary">
                 Explore Collection
               </button>
-              <button className="btn-editorial">
-                Watch Lookbook →
-              </button>
+              <button className="btn-editorial">Watch Lookbook →</button>
             </div>
 
             {/* Stats Row */}
@@ -86,29 +82,29 @@ const Home = () => {
                 <p className="font-headline text-3xl lg:text-4xl text-on-surface font-light">
                   100%
                 </p>
-                <p className="label-atelier !mb-0 mt-1">Natural</p>
+                <p className="label-atelier mb-0! mt-1">Natural</p>
               </div>
               <div>
                 <p className="font-headline text-3xl lg:text-4xl text-on-surface font-light">
                   {products.length || 48}
                 </p>
-                <p className="label-atelier !mb-0 mt-1">Pieces</p>
+                <p className="label-atelier mb-0! mt-1">Pieces</p>
               </div>
               <div>
                 <p className="font-headline text-3xl lg:text-4xl text-on-surface font-light italic">
                   Est.
                 </p>
-                <p className="label-atelier !mb-0 mt-1">2024</p>
+                <p className="label-atelier mb-0! mt-1">2024</p>
               </div>
             </div>
           </div>
 
           {/* Right — Featured Product Image */}
           <div className="relative">
-            <div className="aspect-[4/5] rounded-[2rem] overflow-hidden bg-surface-high img-zoom shadow-ambient-lg">
-              {featuredProduct?.images?.[0]?.url ? (
+            <div className="aspect-4/5 rounded-4xl overflow-hidden bg-surface-high img-zoom shadow-ambient-lg">
+              {featuredProduct?.variants[0].images?.[0]?.url ? (
                 <img
-                  src={featuredProduct.images[0].url}
+                  src={featuredProduct?.variants[0].images[0].url}
                   alt={featuredProduct.title || "Featured product"}
                   className="w-full h-full object-cover"
                 />
@@ -152,21 +148,21 @@ const Home = () => {
       {/* ═══ Marquee Banner ═══ */}
       <div className="py-4 bg-primary overflow-hidden">
         <div className="flex animate-[marquee_30s_linear_infinite] whitespace-nowrap">
-          {[...MARQUEE_ITEMS, ...MARQUEE_ITEMS, ...MARQUEE_ITEMS].map((item, i) => (
-            <span
-              key={i}
-              className="text-[0.65rem] uppercase tracking-[0.2em] text-on-primary/80 font-medium mx-8 flex items-center gap-8">
-              {item}
-              <span className="text-secondary-container">✦</span>
-            </span>
-          ))}
+          {[...MARQUEE_ITEMS, ...MARQUEE_ITEMS, ...MARQUEE_ITEMS].map(
+            (item, i) => (
+              <span
+                key={i}
+                className="text-[0.65rem] uppercase tracking-[0.2em] text-on-primary/80 font-medium mx-8 flex items-center gap-8">
+                {item}
+                <span className="text-secondary-container">✦</span>
+              </span>
+            ),
+          )}
         </div>
       </div>
 
       {/* ═══ Products Grid Section ═══ */}
-      <section
-        id="products-grid"
-        className="py-20 px-6 lg:px-8 bg-surface-low">
+      <section id="products-grid" className="py-20 px-6 lg:px-8 bg-surface-low">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-end justify-between mb-16">
             <div>
@@ -174,7 +170,7 @@ const Home = () => {
                 The Collection
               </p>
               <h2 className="font-headline text-4xl lg:text-5xl text-on-surface font-light">
-                All <em className="italic">Pieces</em>
+                Top <em className="italic">Pieces</em>
               </h2>
             </div>
             <p className="hidden md:block text-sm text-outline font-light">
@@ -201,21 +197,22 @@ const Home = () => {
                 Coming Soon
               </p>
               <p className="text-sm text-outline max-w-md mx-auto">
-                Our artisans are preparing the next collection. Check back
-                soon for new arrivals.
+                Our artisans are preparing the next collection. Check back soon
+                for new arrivals.
               </p>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 stagger-children">
-              {products.map((product) => (
+              {products.slice(0, 4).map((product) => (
                 <div
                   key={product._id}
                   onClick={() => handleProductClick(product._id)}
                   className="card-atelier cursor-pointer group">
                   <div className="aspect-[3/4] overflow-hidden bg-surface-high">
-                    {product.images && product.images.length > 0 ? (
+                    {product.variants[0].images &&
+                    product.variants[0].images.length > 0 ? (
                       <img
-                        src={product.images[0].url}
+                        src={product.variants[0].images[0].url}
                         alt={product.title}
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                       />
@@ -268,24 +265,56 @@ const Home = () => {
               </p>
             </div>
             <div>
-              <p className="label-atelier text-on-surface-variant mb-4">Explore</p>
+              <p className="label-atelier text-on-surface-variant mb-4">
+                Explore
+              </p>
               <div className="flex flex-col gap-3">
-                <a href="#" className="text-xs text-outline no-underline hover:text-secondary transition-colors">Sustainability</a>
-                <a href="#" className="text-xs text-outline no-underline hover:text-secondary transition-colors">Shipping & Returns</a>
-                <a href="#" className="text-xs text-outline no-underline hover:text-secondary transition-colors">Privacy Policy</a>
+                <a
+                  href="#"
+                  className="text-xs text-outline no-underline hover:text-secondary transition-colors">
+                  Sustainability
+                </a>
+                <a
+                  href="#"
+                  className="text-xs text-outline no-underline hover:text-secondary transition-colors">
+                  Shipping & Returns
+                </a>
+                <a
+                  href="#"
+                  className="text-xs text-outline no-underline hover:text-secondary transition-colors">
+                  Privacy Policy
+                </a>
               </div>
             </div>
             <div>
-              <p className="label-atelier text-on-surface-variant mb-4">Connect</p>
+              <p className="label-atelier text-on-surface-variant mb-4">
+                Connect
+              </p>
               <div className="flex flex-col gap-3">
-                <a href="#" className="text-xs text-outline no-underline hover:text-secondary transition-colors">Instagram</a>
-                <a href="#" className="text-xs text-outline no-underline hover:text-secondary transition-colors">Pinterest</a>
-                <a href="#" className="text-xs text-outline no-underline hover:text-secondary transition-colors">Journal</a>
+                <a
+                  href="#"
+                  className="text-xs text-outline no-underline hover:text-secondary transition-colors">
+                  Instagram
+                </a>
+                <a
+                  href="#"
+                  className="text-xs text-outline no-underline hover:text-secondary transition-colors">
+                  Pinterest
+                </a>
+                <a
+                  href="#"
+                  className="text-xs text-outline no-underline hover:text-secondary transition-colors">
+                  Journal
+                </a>
               </div>
             </div>
             <div>
-              <p className="label-atelier text-on-surface-variant mb-4">Newsletter</p>
-              <p className="text-xs text-outline mb-4">Subscribe for early access to collections.</p>
+              <p className="label-atelier text-on-surface-variant mb-4">
+                Newsletter
+              </p>
+              <p className="text-xs text-outline mb-4">
+                Subscribe for early access to collections.
+              </p>
               <div className="flex">
                 <input
                   type="email"

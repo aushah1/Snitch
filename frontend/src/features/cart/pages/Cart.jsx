@@ -33,6 +33,7 @@ const Cart = () => {
     };
     fetchCart();
   }, [handleGetCart, handleCalculateCartTotal]);
+  console.log(cartItems);
 
   const subtotal = cartItems.reduce((sum, item) => {
     const price =
@@ -150,14 +151,20 @@ const Cart = () => {
             {/* Items List */}
             <div className="lg:col-span-2 space-y-5 stagger-children">
               {cartItems.map((item, index) => {
+                console.log(item);
+
                 const product = item.product || {};
-                const variant = item.variant || {};
+                const variantId = typeof item.variant === 'string' ? item.variant : item.variant?._id;
+                const variant = product?.variants?.find(v => v._id === variantId) || (typeof item.variant === 'object' ? item.variant : {});
+                
                 const price =
                   variant.price?.amount || product.price?.amount || 0;
                 const itemCurrency =
                   variant.price?.currency || product.price?.currency || "INR";
                 const imageUrl =
-                  variant.images?.[0]?.url || product.images?.[0]?.url;
+                  variant.images?.[0]?.url ||
+                  product.variants?.[0]?.images?.[0]?.url ||
+                  product.images?.[0]?.url;
                 const sym =
                   { INR: "₹", USD: "$", EUR: "€", GBP: "£", JPY: "¥" }[
                     itemCurrency
@@ -230,7 +237,7 @@ const Cart = () => {
                                   try {
                                     await handleDecreaseQuantity({
                                       productId: item.product._id,
-                                      variantId: item.variant,
+                                      variantId: variantId,
                                     });
                                   } catch (err) {
                                     console.error(
@@ -250,7 +257,7 @@ const Cart = () => {
                                   try {
                                     await handleIncreaseQuantity({
                                       productId: item.product._id,
-                                      variantId: item.variant,
+                                      variantId: variantId,
                                     });
                                   } catch (err) {
                                     console.error(
@@ -287,7 +294,7 @@ const Cart = () => {
                           try {
                             await handleRemoveFromCart({
                               productId: item.product._id,
-                              variantId: item.variant,
+                              variantId: variantId,
                             });
                           } catch (err) {
                             console.error("Failed to remove item:", err);

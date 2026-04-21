@@ -2,21 +2,36 @@ import productModel from "../models/product.model.js";
 import { uploadFile } from "../services/storage.service.js";
 
 export const createProduct = async (req, res) => {
-  const { title, description, priceAmount, priceCurrency, stock } = req.body;
+  const { title, description, priceAmount, priceCurrency, stock, variants , tags } = req.body;
   const seller = req.user;
   console.log(seller);
 
-  const images = await Promise.all(
-    req.files.map(async (file) => {
-      return await uploadFile({
-        buffer: file.buffer,
-        fileName: file.originalname,
-        folder: "snitch",
-      });
-    }),
-  );
-
   try {
+    // Parse variants if it's a string (from FormData)
+    let parsedVariants = [];
+    if (variants) {
+      parsedVariants = typeof variants === 'string' ? JSON.parse(variants) : variants;
+    }
+
+    // Process variant images
+    for (let i = 0; i < parsedVariants.length; i++) {
+      const variantImages = req.files.filter((file) =>
+        file.fieldname.startsWith(`variant-${i}-images`)
+      );
+
+      const uploadedImages = await Promise.all(
+        variantImages.map(async (file) => {
+          return await uploadFile({
+            buffer: file.buffer,
+            fileName: file.originalname,
+            folder: "snitch",
+          });
+        })
+      );
+
+      parsedVariants[i].images = uploadedImages;
+    }
+
     const product = await productModel.create({
       title,
       description,
@@ -25,8 +40,10 @@ export const createProduct = async (req, res) => {
         amount: priceAmount,
         currency: priceCurrency,
       },
-      images,
+      images: [],
       stock: stock || 0,
+      tags: tags || [],
+      variants: parsedVariants,
     });
     res.status(201).json({ success: true, product });
   } catch (err) {
@@ -153,3 +170,29 @@ export const searchProducts = async (req, res) => {
       .json({ success: false, message: "Failed to search products" });
   }
 };
+
+
+export const getSimilarProducts = async (req, res) => {
+  try {
+  const { productId } = req.params;
+  const product = await productModel.findById(productId);
+  if (!product) {
+    return res.status(404).json({
+      message: "Product not found",
+      success: false,
+    });
+  }
+  const similarProducts = await productModel.find({
+    tags: { $in: product.tags },
+    _id: { $ne: productId },
+  }).limit(4);
+  return res.status(200).json({ success: true, similarProducts });
+  } 
+  catch (err) {
+    console.error("Error fetching similar products:", err);
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to fetch similar products" });
+  }
+  
+}

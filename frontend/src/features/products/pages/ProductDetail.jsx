@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router";
 import { useProduct } from "../hooks/useProduct.js";
 import { useCart } from "../../cart/hooks/useCart.js";
 import Navbar from "../components/Navbar";
+import SimilarProducts from "../components/SimilarProducts.jsx";
 
 const ProductDetail = () => {
   const { productId } = useParams();
@@ -24,26 +25,44 @@ const ProductDetail = () => {
 
   useEffect(() => { fetchProductDetails(); }, [productId]);
 
-  useEffect(() => {
-    if (product?.variants?.length > 0) {
-      setSelectedAttributes(product.variants[0].attributes || {});
+  const normalizedProduct = useMemo(() => {
+    if (!product) return null;
+    const np = { ...product };
+    if (np.variants) {
+      np.variants = np.variants.map((v) => {
+        const normalizedAttrs = {};
+        if (v.attributes) {
+          Object.entries(v.attributes).forEach(([k, val]) => {
+            const titleK = k.charAt(0).toUpperCase() + k.slice(1).toLowerCase();
+            normalizedAttrs[titleK] = val;
+          });
+        }
+        return { ...v, attributes: normalizedAttrs };
+      });
     }
+    return np;
   }, [product]);
 
+  useEffect(() => {
+    if (normalizedProduct?.variants?.length > 0) {
+      setSelectedAttributes(normalizedProduct.variants[0].attributes || {});
+    }
+  }, [normalizedProduct]);
+
   const activeVariant = useMemo(() => {
-    if (!product?.variants || product.variants.length === 0) return null;
-    return product.variants.find((v) => {
+    if (!normalizedProduct?.variants || normalizedProduct.variants.length === 0) return null;
+    return normalizedProduct.variants.find((v) => {
       if (!v.attributes) return false;
       const vKeys = Object.keys(v.attributes);
       const sKeys = Object.keys(selectedAttributes);
       return vKeys.length === sKeys.length && vKeys.every((k) => v.attributes[k] === selectedAttributes[k]);
     });
-  }, [product, selectedAttributes]);
+  }, [normalizedProduct, selectedAttributes]);
 
   const availableAttributes = useMemo(() => {
-    if (!product?.variants) return {};
+    if (!normalizedProduct?.variants) return {};
     const attrs = {};
-    product.variants.forEach((variant) => {
+    normalizedProduct.variants.forEach((variant) => {
       if (variant.attributes) {
         Object.entries(variant.attributes).forEach(([key, value]) => {
           if (!attrs[key]) attrs[key] = new Set();
@@ -53,20 +72,20 @@ const ProductDetail = () => {
     });
     Object.keys(attrs).forEach((key) => { attrs[key] = Array.from(attrs[key]); });
     return attrs;
-  }, [product]);
+  }, [normalizedProduct]);
 
   useEffect(() => { setSelectedImage(0); }, [activeVariant]);
 
   const handleAttributeChange = (attrName, value) => {
     const newAttrs = { ...selectedAttributes, [attrName]: value };
-    const exactMatch = product.variants.find((v) => {
+    const exactMatch = normalizedProduct.variants.find((v) => {
       const vAttrs = v.attributes || {};
       return Object.keys(newAttrs).every((k) => newAttrs[k] === vAttrs[k]) &&
         Object.keys(vAttrs).every((k) => newAttrs[k] === vAttrs[k]);
     });
     if (exactMatch) setSelectedAttributes(exactMatch.attributes);
     else {
-      const fallback = product.variants.find((v) => v.attributes && v.attributes[attrName] === value);
+      const fallback = normalizedProduct.variants.find((v) => v.attributes && v.attributes[attrName] === value);
       if (fallback) setSelectedAttributes(fallback.attributes);
       else setSelectedAttributes(newAttrs);
     }
@@ -82,8 +101,8 @@ const ProductDetail = () => {
 
   const displayImages =
     activeVariant?.images?.length > 0 ? activeVariant.images
-    : product.images?.length > 0 ? product.images
-    : [{ url: "" }];
+      : product.images?.length > 0 ? product.images
+        : [{ url: "" }];
   const displayPrice = activeVariant?.price?.amount ? activeVariant.price : product.price;
 
   const accordionItems = [
@@ -146,11 +165,10 @@ const ProductDetail = () => {
                   <button
                     key={idx}
                     onClick={() => setSelectedImage(idx)}
-                    className={`w-16 h-20 rounded-xl overflow-hidden transition-all cursor-pointer border-2 ${
-                      selectedImage === idx
-                        ? "border-secondary opacity-100 shadow-ambient"
-                        : "border-transparent opacity-50 hover:opacity-100"
-                    }`}>
+                    className={`w-16 h-20 rounded-xl overflow-hidden transition-all cursor-pointer border-2 ${selectedImage === idx
+                      ? "border-secondary opacity-100 shadow-ambient"
+                      : "border-transparent opacity-50 hover:opacity-100"
+                      }`}>
                     <img src={img.url} alt={`View ${idx + 1}`} className="w-full h-full object-cover" />
                   </button>
                 ))}
@@ -181,35 +199,36 @@ const ProductDetail = () => {
             </div>
 
             {/* Variant Selectors */}
-            {Object.entries(availableAttributes).map(([attrName, values]) => (
-              <div key={attrName} className="mb-6">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="label-atelier !mb-0">{attrName}</h3>
-                  {attrName.toLowerCase() === "size" && (
-                    <button className="text-xs text-on-surface-variant hover:text-secondary transition-colors bg-transparent border-none cursor-pointer underline underline-offset-4">
-                      Size Guide
-                    </button>
-                  )}
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {values.map((val) => {
-                    const isSelected = selectedAttributes[attrName] === val;
-                    return (
-                      <button
-                        key={val}
-                        onClick={() => handleAttributeChange(attrName, val)}
-                        className={`w-12 h-12 rounded-full text-xs font-medium uppercase tracking-wider transition-all cursor-pointer border ${
-                          isSelected
+            <div className="flex flex-wrap gap-x-12 gap-y-6 mb-8">
+              {Object.entries(availableAttributes).map(([attrName, values]) => (
+                <div key={attrName} className="flex-1 min-w-[120px]">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="label-atelier !mb-0">{attrName}</h3>
+                    {attrName.toLowerCase() === "size" && (
+                      <button className="text-xs text-on-surface-variant hover:text-secondary transition-colors bg-transparent border-none cursor-pointer underline underline-offset-4">
+                        Size Guide
+                      </button>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {values.map((val) => {
+                      const isSelected = selectedAttributes[attrName] === val;
+                      return (
+                        <button
+                          key={val}
+                          onClick={() => handleAttributeChange(attrName, val)}
+                          className={`min-w-[3rem] px-3 h-12 rounded-full text-xs font-medium uppercase tracking-wider transition-all cursor-pointer border ${isSelected
                             ? "bg-primary text-on-primary border-primary"
                             : "bg-transparent text-on-surface border-outline-variant hover:border-primary"
-                        }`}>
-                        {val}
-                      </button>
-                    );
-                  })}
+                            }`}>
+                          {val}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
 
             {/* Stock */}
             {activeVariant && activeVariant.stock !== undefined && (
@@ -251,6 +270,11 @@ const ProductDetail = () => {
             </div>
           </div>
         </div>
+
+      </div>
+
+      <div className="max-w-7xl mx-auto">
+        <SimilarProducts />
       </div>
 
       {/* Footer */}

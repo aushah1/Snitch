@@ -26,14 +26,6 @@ const productSchema = new mongoose.Schema(
         default: "INR",
       },
     },
-    images: [
-      {
-        url: {
-          type: String,
-          required: true,
-        },
-      },
-    ],
     variants: [
       {
         attributes: {
@@ -63,6 +55,19 @@ const productSchema = new mongoose.Schema(
         },
       },
     ],
+    images: [
+      {
+        url: {
+          type: String,
+        },
+      },
+    ],
+    tags: {
+      type: [String],
+      lowercase: true,
+      trim: true,
+      index: true,
+    },
   },
   { timestamps: true },
 );

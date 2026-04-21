@@ -1,5 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap");
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
 
 @theme {
   /* MAISONelle — The Curated Atelier */
@@ -39,11 +39,9 @@
   --color-tertiary: #000000;
   --color-tertiary-container: #1c1c19;
 
-  --font-headline: 'Newsreader', serif;
-  --font-body: 'Plus Jakarta Sans', sans-serif;
+  --font-headline: "Newsreader", serif;
+  --font-body: "Plus Jakarta Sans", sans-serif;
 }
-
-
 
 html {
   scroll-behavior: smooth;
@@ -154,7 +152,11 @@ h6 {
 }
 
 .btn-secondary {
-  background: linear-gradient(135deg, var(--color-secondary) 0%, var(--color-on-secondary-container) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-secondary) 0%,
+    var(--color-on-secondary-container) 100%
+  );
   color: var(--color-on-secondary);
 }
 
@@ -290,40 +292,40 @@ select.input-atelier {
   }
 }
 
-.stagger-children>* {
+.stagger-children > * {
   opacity: 0;
   animation: staggerIn 0.5s ease forwards;
 }
 
-.stagger-children>*:nth-child(1) {
+.stagger-children > *:nth-child(1) {
   animation-delay: 0.05s;
 }
 
-.stagger-children>*:nth-child(2) {
+.stagger-children > *:nth-child(2) {
   animation-delay: 0.1s;
 }
 
-.stagger-children>*:nth-child(3) {
+.stagger-children > *:nth-child(3) {
   animation-delay: 0.15s;
 }
 
-.stagger-children>*:nth-child(4) {
+.stagger-children > *:nth-child(4) {
   animation-delay: 0.2s;
 }
 
-.stagger-children>*:nth-child(5) {
+.stagger-children > *:nth-child(5) {
   animation-delay: 0.25s;
 }
 
-.stagger-children>*:nth-child(6) {
+.stagger-children > *:nth-child(6) {
   animation-delay: 0.3s;
 }
 
-.stagger-children>*:nth-child(7) {
+.stagger-children > *:nth-child(7) {
   animation-delay: 0.35s;
 }
 
-.stagger-children>*:nth-child(8) {
+.stagger-children > *:nth-child(8) {
   animation-delay: 0.4s;
 }
 
@@ -343,7 +345,12 @@ select.input-atelier {
    SHIMMER LOADING
    ═══════════════════════════════════════════ */
 .shimmer {
-  background: linear-gradient(90deg, var(--color-surface-high) 25%, var(--color-surface-container) 50%, var(--color-surface-high) 75%);
+  background: linear-gradient(
+    90deg,
+    var(--color-surface-high) 25%,
+    var(--color-surface-container) 50%,
+    var(--color-surface-high) 75%
+  );
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }
@@ -390,7 +397,12 @@ select.input-atelier {
    ═══════════════════════════════════════════ */
 .tonal-divider {
   height: 1px;
-  background: linear-gradient(to right, transparent, var(--color-outline-variant), transparent);
+  background: linear-gradient(
+    to right,
+    transparent,
+    var(--color-outline-variant),
+    transparent
+  );
   opacity: 0.3;
   margin: 1.5rem 0;
 }
