@@ -39,7 +39,7 @@ export const loginUser = async ({ email, password }) => {
 
 export const googleLogin = async () => {
   try {
-    const response = (window.location.href = "/api/auth/google");
+    const response = (window.location.href = "https://snitch-yhyl.onrender.com/api/auth/google");
     return response.data;
   } catch (error) {
     console.error("Error during Google login:", error);
