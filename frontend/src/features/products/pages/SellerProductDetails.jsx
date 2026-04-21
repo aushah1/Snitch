@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useProduct } from "../hooks/useProduct";
 import { useParams } from "react-router";
+import Navbar from "../components/Navbar";
 
 // Helper icons
 const PlusIcon = () => (
@@ -226,6 +227,7 @@ const SellerProductDetails = () => {
 
   return (
     <div className="min-h-screen bg-[#fbf9f6] text-[#1b1c1a] font-sans pb-24">
+      <Navbar/>
       {/* Top Banner / Header */}
       <header className="sticky top-0 z-10 bg-[#fbf9f6]/80 backdrop-blur-md px-6 py-4 flex items-center justify-between">
         <h1 className="font-serif text-xl tracking-wide uppercase">
