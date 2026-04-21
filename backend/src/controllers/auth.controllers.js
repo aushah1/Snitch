@@ -6,7 +6,11 @@ const validateToken = (user, res, message) => {
   const token = jwt.sign({ id: user._id }, config.JWT_SECRET, {
     expiresIn: "8h",
   });
-  res.cookie("token", token);
+ res.cookie("token", token, {
+  httpOnly: true,
+  secure: true,
+  sameSite: "none",
+});
   res.status(200).json({
     message,
     success: true,
