@@ -161,7 +161,7 @@ const Login = () => {
         </div>
 
         {/* Social */}
-        <GoogleLogin />
+        {/* <GoogleLogin /> */}
       </div>
     </div>
   );
