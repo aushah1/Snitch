@@ -1,0 +1,461 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
+
+@theme {
+  /* MAISONelle — The Curated Atelier */
+  --color-bg: #fcf9f4;
+  --color-bg-dim: #dcdad5;
+  --color-surface: #fcf9f4;
+  --color-surface-low: #f6f3ee;
+  --color-surface-container: #f0ede8;
+  --color-surface-high: #ebe8e3;
+  --color-surface-highest: #e5e2dd;
+  --color-surface-lowest: #ffffff;
+
+  --color-primary: #1c1c19;
+  --color-primary-container: #1d1b17;
+  --color-on-primary: #ffffff;
+  --color-on-primary-container: #87837d;
+
+  --color-secondary: #735a39;
+  --color-secondary-container: #fddab1;
+  --color-on-secondary: #ffffff;
+  --color-on-secondary-container: #785e3d;
+
+  --color-on-surface: #1c1c19;
+  --color-on-surface-variant: #4a463f;
+  --color-outline: #7b766e;
+  --color-outline-variant: #ccc6bc;
+
+  --color-error: #ba1a1a;
+  --color-error-container: #ffdad6;
+  --color-on-error: #ffffff;
+  --color-on-error-container: #93000a;
+
+  --color-inverse-surface: #31302d;
+  --color-inverse-on-surface: #f3f0eb;
+  --color-inverse-primary: #cbc6bf;
+
+  --color-tertiary: #000000;
+  --color-tertiary-container: #1c1c19;
+
+  --font-headline: 'Newsreader', serif;
+  --font-body: 'Plus Jakarta Sans', sans-serif;
+}
+
+
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--color-bg);
+  color: var(--color-on-surface);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
+  font-weight: 300;
+  letter-spacing: 0.01em;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-headline);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+/* ═══════════════════════════════════════════
+   GLASS EFFECTS
+   ═══════════════════════════════════════════ */
+.glass {
+  background: rgba(252, 249, 244, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.glass-dark {
+  background: rgba(29, 27, 23, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+/* ═══════════════════════════════════════════
+   AMBIENT SHADOWS (no hard box-shadows)
+   ═══════════════════════════════════════════ */
+.shadow-ambient {
+  box-shadow: 0 12px 40px rgba(28, 28, 25, 0.06);
+}
+
+.shadow-ambient-lg {
+  box-shadow: 0 20px 60px rgba(28, 28, 25, 0.08);
+}
+
+.shadow-ambient-hover {
+  box-shadow: 0 16px 48px rgba(28, 28, 25, 0.1);
+}
+
+/* ═══════════════════════════════════════════
+   GHOST BORDER
+   ═══════════════════════════════════════════ */
+.ghost-border {
+  border: 1px solid rgba(204, 198, 188, 0.25);
+}
+
+/* ═══════════════════════════════════════════
+   BUTTONS
+   ═══════════════════════════════════════════ */
+.btn-pill {
+  border-radius: 9999px;
+  padding: 0.75rem 2rem;
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 0.875rem;
+  letter-spacing: 0.04em;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  cursor: pointer;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  text-decoration: none;
+}
+
+.btn-pill:hover {
+  transform: translateY(-1px);
+}
+
+.btn-pill:active {
+  transform: translateY(0);
+}
+
+.btn-primary {
+  background-color: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+.btn-primary:hover {
+  background-color: #2a2a26;
+}
+
+.btn-primary:disabled {
+  background-color: var(--color-outline-variant);
+  color: var(--color-outline);
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-secondary {
+  background: linear-gradient(135deg, var(--color-secondary) 0%, var(--color-on-secondary-container) 100%);
+  color: var(--color-on-secondary);
+}
+
+.btn-secondary:hover {
+  opacity: 0.92;
+}
+
+.btn-editorial {
+  background: transparent;
+  color: var(--color-on-surface);
+  border: none;
+  border-bottom: 1px solid rgba(115, 90, 57, 0.3);
+  border-radius: 0;
+  padding: 0.25rem 0;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  font-family: var(--font-body);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.btn-editorial:hover {
+  border-bottom-color: var(--color-secondary);
+  color: var(--color-secondary);
+}
+
+/* ═══════════════════════════════════════════
+   INPUTS — Pill Shaped, Borderless
+   ═══════════════════════════════════════════ */
+.input-atelier {
+  width: 100%;
+  padding: 0.875rem 1.5rem;
+  background-color: var(--color-surface-high);
+  border: 1px solid transparent;
+  border-radius: 9999px;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: var(--color-on-surface);
+  transition: all 0.3s ease;
+  outline: none;
+  letter-spacing: 0.02em;
+}
+
+.input-atelier:focus {
+  background-color: var(--color-surface-lowest);
+  border-color: rgba(115, 90, 57, 0.25);
+  box-shadow: 0 0 0 3px rgba(115, 90, 57, 0.08);
+}
+
+.input-atelier::placeholder {
+  color: var(--color-outline);
+  font-weight: 300;
+}
+
+.input-atelier.input-error {
+  border-color: rgba(186, 26, 26, 0.3);
+  background-color: #fffbfa;
+}
+
+textarea.input-atelier {
+  border-radius: 1.5rem;
+  resize: vertical;
+  min-height: 120px;
+}
+
+select.input-atelier {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%237b766e' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1.25rem center;
+  padding-right: 3rem;
+}
+
+/* ═══════════════════════════════════════════
+   LABEL
+   ═══════════════════════════════════════════ */
+.label-atelier {
+  font-family: var(--font-body);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-on-surface-variant);
+  margin-bottom: 0.75rem;
+  display: block;
+}
+
+/* ═══════════════════════════════════════════
+   CARDS
+   ═══════════════════════════════════════════ */
+.card-atelier {
+  background: var(--color-surface-lowest);
+  border-radius: 1.5rem;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  box-shadow: 0 4px 20px rgba(28, 28, 25, 0.04);
+}
+
+.card-atelier:hover {
+  box-shadow: 0 20px 60px rgba(28, 28, 25, 0.1);
+  transform: translateY(-4px);
+}
+
+/* ═══════════════════════════════════════════
+   NAVIGATION GLASS
+   ═══════════════════════════════════════════ */
+.nav-glass {
+  background: rgba(252, 249, 244, 0.88);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+
+/* ═══════════════════════════════════════════
+   ANIMATIONS
+   ═══════════════════════════════════════════ */
+.page-enter {
+  animation: pageEnter 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes pageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.stagger-children>* {
+  opacity: 0;
+  animation: staggerIn 0.5s ease forwards;
+}
+
+.stagger-children>*:nth-child(1) {
+  animation-delay: 0.05s;
+}
+
+.stagger-children>*:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.stagger-children>*:nth-child(3) {
+  animation-delay: 0.15s;
+}
+
+.stagger-children>*:nth-child(4) {
+  animation-delay: 0.2s;
+}
+
+.stagger-children>*:nth-child(5) {
+  animation-delay: 0.25s;
+}
+
+.stagger-children>*:nth-child(6) {
+  animation-delay: 0.3s;
+}
+
+.stagger-children>*:nth-child(7) {
+  animation-delay: 0.35s;
+}
+
+.stagger-children>*:nth-child(8) {
+  animation-delay: 0.4s;
+}
+
+@keyframes staggerIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ═══════════════════════════════════════════
+   SHIMMER LOADING
+   ═══════════════════════════════════════════ */
+.shimmer {
+  background: linear-gradient(90deg, var(--color-surface-high) 25%, var(--color-surface-container) 50%, var(--color-surface-high) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* ═══════════════════════════════════════════
+   SPINNER
+   ═══════════════════════════════════════════ */
+.spinner-atelier {
+  width: 32px;
+  height: 32px;
+  border: 2px solid var(--color-outline-variant);
+  border-top-color: var(--color-secondary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ═══════════════════════════════════════════
+   TONAL DIVIDER
+   ═══════════════════════════════════════════ */
+.tonal-divider {
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--color-outline-variant), transparent);
+  opacity: 0.3;
+  margin: 1.5rem 0;
+}
+
+/* ═══════════════════════════════════════════
+   IMAGE ZOOM
+   ═══════════════════════════════════════════ */
+.img-zoom {
+  overflow: hidden;
+}
+
+.img-zoom img {
+  transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.img-zoom:hover img {
+  transform: scale(1.05);
+}
+
+/* ═══════════════════════════════════════════
+   CHECKBOX
+   ═══════════════════════════════════════════ */
+.checkbox-atelier {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-secondary);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* ═══════════════════════════════════════════
+   DROPZONE
+   ═══════════════════════════════════════════ */
+.dropzone-atelier {
+  border: 2px dashed var(--color-outline-variant);
+  border-radius: 1.5rem;
+  padding: 3rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: var(--color-surface-low);
+}
+
+.dropzone-atelier:hover,
+.dropzone-atelier.dragging {
+  border-color: var(--color-secondary);
+  background: rgba(253, 218, 177, 0.08);
+}
+
+/* ═══════════════════════════════════════════
+   MODAL OVERLAY
+   ═══════════════════════════════════════════ */
+.modal-overlay {
+  background: rgba(29, 27, 23, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* ═══════════════════════════════════════════
+   SCROLLBAR
+   ═══════════════════════════════════════════ */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-outline-variant);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-outline);
+}
