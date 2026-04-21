@@ -184,7 +184,7 @@ const Register = () => {
           <div className="flex-1 h-px bg-outline-variant/30" />
         </div>
 
-        <GoogleLogin />
+        {/* <GoogleLogin /> */}
 
         <p className="text-center text-sm text-outline mt-6 font-light">
           Already have an account?{" "}
