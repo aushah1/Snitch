@@ -8,7 +8,7 @@ const Navbar = () => {
   const cartItems = useSelector((state) => state.cart.items);
   const navigate = useNavigate();
   const location = useLocation();
-  const { handleSearchProducts, handleGetAllProducts } = useProduct();
+  const { handleSearchProducts } = useProduct();
 
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -33,7 +33,6 @@ const Navbar = () => {
     setSearchResults([]);
   }, [location.pathname]);
 
-  // Close search on outside click
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (searchRef.current && !searchRef.current.contains(e.target)) {
@@ -45,26 +44,19 @@ const Navbar = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Focus input when search opens
   useEffect(() => {
-    if (searchOpen && searchInputRef.current) {
-      searchInputRef.current.focus();
-    }
+    if (searchOpen && searchInputRef.current) searchInputRef.current.focus();
   }, [searchOpen]);
 
-  // Debounced search
   const handleSearchChange = (e) => {
     const query = e.target.value;
     setSearchQuery(query);
-
     if (debounceRef.current) clearTimeout(debounceRef.current);
-
     if (!query.trim()) {
       setSearchResults([]);
       setSearching(false);
       return;
     }
-
     setSearching(true);
     debounceRef.current = setTimeout(async () => {
       try {
@@ -88,8 +80,6 @@ const Navbar = () => {
     }
   };
 
-  const isActive = (path) => location.pathname === path;
-
   const cartCount = cartItems?.length || 0;
 
   return (
@@ -99,31 +89,32 @@ const Navbar = () => {
       }`}>
       <div className="max-w-7xl mx-auto px-6 lg:px-8 flex items-center justify-between">
         {/* Brand */}
-        <Link to="/" className="flex flex-col items-start no-underline group">
-          <span className="font-headline text-2xl tracking-tight text-on-surface font-normal">
-            MAISON<em className="not-italic font-light opacity-60">elle</em>
+        <Link to="/" className="flex items-baseline gap-0 no-underline group">
+          <span className="font-headline text-xl tracking-tight text-on-surface italic">
+            MAISON
           </span>
-          <span className="font-body text-[0.55rem] uppercase tracking-[0.3em] text-outline mt-[-2px]">
-            The Curated Atelier
+          <span className="font-headline text-xl tracking-tight text-on-surface font-light not-italic">
+            elle
           </span>
         </Link>
 
-        {/* Desktop Nav */}
-        <div className="hidden md:flex items-center gap-10">
+        {/* Desktop Nav Links */}
+        <div className="hidden md:flex items-center gap-8 ml-10">
           <Link
             to="/"
             className={`btn-editorial no-underline transition-all ${
-              isActive("/") ? "text-secondary !border-b-secondary" : ""
+              location.pathname === "/"
+                ? "text-secondary !border-b-secondary"
+                : ""
             }`}>
-            Collection
+            Shop
           </Link>
-
           {user?.role === "seller" && (
             <>
               <Link
                 to="/dashboard"
                 className={`btn-editorial no-underline transition-all ${
-                  isActive("/dashboard")
+                  location.pathname === "/dashboard"
                     ? "text-secondary !border-b-secondary"
                     : ""
                 }`}>
@@ -132,7 +123,7 @@ const Navbar = () => {
               <Link
                 to="/products/create"
                 className={`btn-editorial no-underline transition-all ${
-                  isActive("/products/create")
+                  location.pathname === "/products/create"
                     ? "text-secondary !border-b-secondary"
                     : ""
                 }`}>
@@ -140,23 +131,27 @@ const Navbar = () => {
               </Link>
             </>
           )}
+          <Link
+            to="/"
+            className="btn-editorial no-underline">
+            Collections
+          </Link>
         </div>
 
         {/* Right Section */}
-        <div className="hidden md:flex items-center gap-3">
+        <div className="hidden md:flex items-center gap-4">
           {/* Search */}
           <div ref={searchRef} className="relative">
             <button
               onClick={() => setSearchOpen(!searchOpen)}
               className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-surface-high transition-all cursor-pointer border-none bg-transparent text-on-surface-variant hover:text-on-surface"
               aria-label="Search">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
                 <circle cx="11" cy="11" r="8" />
                 <path d="m21 21-4.3-4.3" />
               </svg>
             </button>
 
-            {/* Search Dropdown */}
             {searchOpen && (
               <div className="absolute right-0 top-full mt-3 w-96 bg-surface-lowest rounded-2xl shadow-ambient-lg page-enter overflow-hidden">
                 <form onSubmit={handleSearchSubmit} className="p-4">
@@ -175,8 +170,6 @@ const Navbar = () => {
                     />
                   </div>
                 </form>
-
-                {/* Results */}
                 {(searching || searchResults.length > 0 || (searchQuery && !searching)) && (
                   <div className="border-t border-outline-variant/10">
                     {searching ? (
@@ -196,7 +189,7 @@ const Navbar = () => {
                               setSearchQuery("");
                             }}
                             className="w-full flex items-center gap-4 px-4 py-3 hover:bg-surface-low transition-colors text-left bg-transparent border-none cursor-pointer">
-                            <div className="w-12 h-12 rounded-lg overflow-hidden bg-surface-high shrink-0">
+                            <div className="w-12 h-12 rounded-xl overflow-hidden bg-surface-high shrink-0">
                               {product.images?.[0]?.url ? (
                                 <img src={product.images[0].url} alt="" className="w-full h-full object-cover" />
                               ) : (
@@ -216,15 +209,6 @@ const Navbar = () => {
                             </svg>
                           </button>
                         ))}
-                        {searchResults.length > 6 && (
-                          <div className="px-4 py-3 text-center">
-                            <button
-                              onClick={handleSearchSubmit}
-                              className="text-xs text-secondary font-medium uppercase tracking-wider bg-transparent border-none cursor-pointer hover:opacity-70">
-                              View all {searchResults.length} results →
-                            </button>
-                          </div>
-                        )}
                       </div>
                     ) : searchQuery.trim() ? (
                       <div className="p-6 text-center">
@@ -239,8 +223,8 @@ const Navbar = () => {
           </div>
 
           {user ? (
-            <div className="flex items-center gap-3">
-              {/* Cart Icon */}
+            <div className="flex items-center gap-4">
+              {/* Cart */}
               <Link
                 to="/cart"
                 className="relative w-9 h-9 rounded-full flex items-center justify-center hover:bg-surface-high transition-all no-underline text-on-surface-variant hover:text-on-surface"
@@ -257,18 +241,10 @@ const Navbar = () => {
                 )}
               </Link>
 
-              {/* User */}
-              <div className="flex items-center gap-3 ml-1">
-                <div className="text-right">
-                  <p className="text-xs font-medium text-on-surface leading-tight">
-                    {user.fullname}
-                  </p>
-                  <p className="text-[0.6rem] uppercase tracking-[0.12em] text-outline">
-                    {user.role}
-                  </p>
-                </div>
-                <div className="w-9 h-9 rounded-full bg-primary-container flex items-center justify-center">
-                  <span className="text-sm text-on-primary">
+              {/* User Avatar */}
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-full bg-primary-container flex items-center justify-center cursor-pointer">
+                  <span className="text-sm text-on-primary font-headline">
                     {user.fullname?.charAt(0)?.toUpperCase()}
                   </span>
                 </div>
@@ -278,21 +254,15 @@ const Navbar = () => {
             <div className="flex items-center gap-3">
               <button
                 onClick={() => navigate("/login")}
-                className="btn-editorial cursor-pointer bg-transparent border-none">
-                Sign In
-              </button>
-              <button
-                onClick={() => navigate("/register")}
                 className="btn-pill btn-primary text-xs">
-                Join Atelier
+                Sign In
               </button>
             </div>
           )}
         </div>
 
-        {/* Mobile Right Icons */}
+        {/* Mobile Right */}
         <div className="flex md:hidden items-center gap-2">
-          {/* Mobile Search */}
           <button
             onClick={() => setSearchOpen(!searchOpen)}
             className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-surface-high transition-all cursor-pointer border-none bg-transparent text-on-surface-variant"
@@ -302,13 +272,8 @@ const Navbar = () => {
               <path d="m21 21-4.3-4.3" />
             </svg>
           </button>
-
-          {/* Mobile Cart */}
           {user && (
-            <Link
-              to="/cart"
-              className="relative w-9 h-9 rounded-full flex items-center justify-center hover:bg-surface-high transition-all no-underline text-on-surface-variant"
-              aria-label="Cart">
+            <Link to="/cart" className="relative w-9 h-9 rounded-full flex items-center justify-center hover:bg-surface-high transition-all no-underline text-on-surface-variant" aria-label="Cart">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
                 <line x1="3" y1="6" x2="21" y2="6" />
@@ -321,8 +286,6 @@ const Navbar = () => {
               )}
             </Link>
           )}
-
-          {/* Hamburger */}
           <button
             className="flex flex-col gap-1.5 cursor-pointer bg-transparent border-none p-2"
             onClick={() => setMobileOpen(!mobileOpen)}
@@ -334,7 +297,7 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Mobile Search Panel */}
+      {/* Mobile Search */}
       {searchOpen && (
         <div ref={searchRef} className="md:hidden mx-4 mt-2 bg-surface-lowest rounded-2xl shadow-ambient-lg page-enter overflow-hidden">
           <form onSubmit={handleSearchSubmit} className="p-4">
@@ -344,7 +307,7 @@ const Navbar = () => {
                 <path d="m21 21-4.3-4.3" />
               </svg>
               <input
-                ref={!searchOpen ? null : searchInputRef}
+                ref={searchInputRef}
                 type="text"
                 value={searchQuery}
                 onChange={handleSearchChange}
@@ -379,9 +342,7 @@ const Navbar = () => {
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-sm text-on-surface font-medium line-clamp-1">{product.title}</p>
-                    <p className="text-xs text-outline font-light">
-                      {product.price?.currency} {product.price?.amount?.toLocaleString()}
-                    </p>
+                    <p className="text-xs text-outline font-light">{product.price?.currency} {product.price?.amount?.toLocaleString()}</p>
                   </div>
                 </button>
               ))}
@@ -398,39 +359,24 @@ const Navbar = () => {
       {mobileOpen && (
         <div className="md:hidden glass mt-2 mx-4 rounded-2xl p-6 shadow-ambient-lg page-enter">
           <div className="flex flex-col gap-4">
-            <Link to="/" className="btn-editorial no-underline text-center">
-              Collection
-            </Link>
+            <Link to="/" className="btn-editorial no-underline text-center">Shop</Link>
+            <Link to="/" className="btn-editorial no-underline text-center">Collections</Link>
             {user?.role === "seller" && (
               <>
-                <Link to="/dashboard" className="btn-editorial no-underline text-center">
-                  Atelier
-                </Link>
-                <Link to="/products/create" className="btn-editorial no-underline text-center">
-                  Create
-                </Link>
+                <Link to="/dashboard" className="btn-editorial no-underline text-center">Atelier</Link>
+                <Link to="/products/create" className="btn-editorial no-underline text-center">Create</Link>
               </>
             )}
             <div className="tonal-divider" />
             {user ? (
               <div className="text-center">
-                <p className="text-sm font-medium">{user.fullname}</p>
-                <p className="text-[0.6rem] uppercase tracking-[0.12em] text-outline">
-                  {user.role}
-                </p>
+                <p className="text-sm font-medium text-on-surface">{user.fullname}</p>
+                <p className="text-[0.6rem] uppercase tracking-[0.12em] text-outline">{user.role}</p>
               </div>
             ) : (
               <div className="flex flex-col gap-3">
-                <button
-                  onClick={() => navigate("/login")}
-                  className="btn-pill btn-primary w-full">
-                  Sign In
-                </button>
-                <button
-                  onClick={() => navigate("/register")}
-                  className="btn-pill bg-transparent text-on-surface w-full ghost-border">
-                  Join Atelier
-                </button>
+                <button onClick={() => navigate("/login")} className="btn-pill btn-primary w-full">Sign In</button>
+                <button onClick={() => navigate("/register")} className="btn-pill bg-transparent text-on-surface w-full ghost-border">Create Account</button>
               </div>
             )}
           </div>

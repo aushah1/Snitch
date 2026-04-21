@@ -1,30 +1,28 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { useParams, Link, useNavigate } from "react-router";
+import { useParams, Link } from "react-router";
 import { useProduct } from "../hooks/useProduct.js";
 import { useCart } from "../../cart/hooks/useCart.js";
+import Navbar from "../components/Navbar";
 
 const ProductDetail = () => {
   const { productId } = useParams();
   const [product, setProduct] = useState(null);
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedAttributes, setSelectedAttributes] = useState({});
-  const navigate = useNavigate();
+  const [openAccordion, setOpenAccordion] = useState(null);
   const { handleGetProductDetails } = useProduct();
-  const { handleAddItem } = useCart();
+  const { handleAddToCart } = useCart();
 
   async function fetchProductDetails() {
     try {
       const data = await handleGetProductDetails(productId);
-      // Handle both cases depending on how API is structured
       setProduct(data?.product || data);
     } catch (error) {
       console.error("Failed to fetch product details", error);
     }
   }
 
-  useEffect(() => {
-    fetchProductDetails();
-  }, [productId]);
+  useEffect(() => { fetchProductDetails(); }, [productId]);
 
   useEffect(() => {
     if (product?.variants?.length > 0) {
@@ -38,16 +36,9 @@ const ProductDetail = () => {
       if (!v.attributes) return false;
       const vKeys = Object.keys(v.attributes);
       const sKeys = Object.keys(selectedAttributes);
-      const isMatch = vKeys.every(
-        (k) => v.attributes[k] === selectedAttributes[k],
-      );
-      // If they don't have exactly the same keys, they shouldn't perfectly match,
-      // but we might only care about matching what's available.
-      return vKeys.length === sKeys.length && isMatch;
+      return vKeys.length === sKeys.length && vKeys.every((k) => v.attributes[k] === selectedAttributes[k]);
     });
   }, [product, selectedAttributes]);
-
-  console.log({ product, activeVariant });
 
   const availableAttributes = useMemo(() => {
     if (!product?.variants) return {};
@@ -60,365 +51,224 @@ const ProductDetail = () => {
         });
       }
     });
-    Object.keys(attrs).forEach((key) => {
-      attrs[key] = Array.from(attrs[key]);
-    });
+    Object.keys(attrs).forEach((key) => { attrs[key] = Array.from(attrs[key]); });
     return attrs;
   }, [product]);
 
-  useEffect(() => {
-    setSelectedImage(0);
-  }, [activeVariant]);
+  useEffect(() => { setSelectedImage(0); }, [activeVariant]);
 
   const handleAttributeChange = (attrName, value) => {
     const newAttrs = { ...selectedAttributes, [attrName]: value };
-
-    // Find if an exact match exists for this combination
     const exactMatch = product.variants.find((v) => {
       const vAttrs = v.attributes || {};
-      return (
-        Object.keys(newAttrs).every((k) => newAttrs[k] === vAttrs[k]) &&
-        Object.keys(vAttrs).every((k) => newAttrs[k] === vAttrs[k])
-      );
+      return Object.keys(newAttrs).every((k) => newAttrs[k] === vAttrs[k]) &&
+        Object.keys(vAttrs).every((k) => newAttrs[k] === vAttrs[k]);
     });
-
-    if (exactMatch) {
-      setSelectedAttributes(exactMatch.attributes);
-    } else {
-      // Find any variant that has this newly selected attribute to fallback nicely
-      const fallbackVariant = product.variants.find(
-        (v) => v.attributes && v.attributes[attrName] === value,
-      );
-      if (fallbackVariant) {
-        setSelectedAttributes(fallbackVariant.attributes);
-      } else {
-        setSelectedAttributes(newAttrs);
-      }
+    if (exactMatch) setSelectedAttributes(exactMatch.attributes);
+    else {
+      const fallback = product.variants.find((v) => v.attributes && v.attributes[attrName] === value);
+      if (fallback) setSelectedAttributes(fallback.attributes);
+      else setSelectedAttributes(newAttrs);
     }
   };
 
   if (!product) {
     return (
-      <div
-        className="min-h-screen flex items-center justify-center selection:bg-[#C9A96E]/30"
-        style={{ backgroundColor: "#fbf9f6" }}>
-        <p
-          style={{ fontFamily: "'Inter', sans-serif", color: "#B5ADA3" }}
-          className="text-[10px] uppercase tracking-[0.2em] font-medium animate-pulse">
-          Retrieving piece...
-        </p>
+      <div className="min-h-screen bg-bg flex items-center justify-center">
+        <div className="spinner-atelier" />
       </div>
     );
   }
 
-  console.log(product);
-
-  // Fallbacks
   const displayImages =
-    activeVariant?.images && activeVariant.images.length > 0
-      ? activeVariant.images
-      : product.images && product.images.length > 0
-        ? product.images
-        : [{ url: "/snitch_editorial_warm.png" }];
+    activeVariant?.images?.length > 0 ? activeVariant.images
+    : product.images?.length > 0 ? product.images
+    : [{ url: "" }];
+  const displayPrice = activeVariant?.price?.amount ? activeVariant.price : product.price;
 
-  const displayPrice = activeVariant?.price?.amount
-    ? activeVariant.price
-    : product.price;
+  const accordionItems = [
+    { id: "craftsmanship", title: "Craftsmanship", content: "Every piece is meticulously crafted by our skilled artisans using time-honored techniques passed down through generations." },
+    { id: "sizing", title: "Sizing & Fit", content: "Our pieces are designed for a relaxed, modern fit. We recommend selecting your usual size for the intended silhouette." },
+    { id: "sustainability", title: "Sustainability", content: "We are committed to sustainable practices. All materials are responsibly sourced and our production processes minimize environmental impact." },
+  ];
 
   return (
-    <>
-      {/* Google Fonts */}
-      <link
-        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap"
-        rel="stylesheet"
-      />
+    <div className="min-h-screen bg-bg">
+      <Navbar />
 
-      <div
-        className="min-h-screen selection:bg-[#C9A96E]/30 pb-24"
-        style={{
-          backgroundColor: "#fbf9f6",
-          fontFamily: "'Inter', sans-serif",
-        }}>
-        {/* ── Navbar ── */}
-        <nav
-          className="px-8 lg:px-16 xl:px-24 pt-10 pb-6 flex items-center justify-between border-b"
-          style={{ borderColor: "#e4e2df" }}>
-          <Link
-            to="/"
-            className="text-sm font-medium tracking-[0.35em] uppercase hover:opacity-80 transition-opacity"
-            style={{
-              fontFamily: "'Cormorant Garamond', serif",
-              color: "#C9A96E",
-            }}>
-            Snitch.
-          </Link>
-          <button
-            onClick={() => navigate(-1)}
-            className="text-[10px] uppercase tracking-[0.2em] font-medium transition-colors hover:text-[#C9A96E]"
-            style={{ color: "#7A6E63" }}>
-            Return to Archive
-          </button>
-        </nav>
+      <div className="pt-24 pb-20 px-6 lg:px-8 max-w-7xl mx-auto page-enter">
+        {/* Breadcrumb */}
+        <div className="mb-8">
+          <p className="label-atelier text-outline mb-0!">
+            <Link to="/" className="no-underline text-outline hover:text-secondary transition-colors">Collections</Link>
+            {" "}— Atelier
+          </p>
+        </div>
 
-        <div className="max-w-7xl mx-auto px-8 lg:px-16 xl:px-24 pt-12 lg:pt-20">
-          <div className="flex flex-col lg:flex-row gap-12 lg:gap-24 items-start">
-            {/* ── LEFT: Image Gallery ── */}
-            <div className="w-full lg:w-[70%] flex flex-col-reverse md:flex-row gap-4 lg:gap-6">
-              {/* Thumbnails (Vertical on Desktop, Horizontal on Mobile) */}
-              {displayImages.length > 1 && (
-                <div className="flex flex-row md:flex-col gap-4 overflow-x-auto md:overflow-y-auto pb-2 md:pb-0 scrollbar-hide w-full md:w-20 lg:w-24 flex-shrink-0 md:max-h-[calc(100vh-200px)]">
-                  {displayImages.map((img, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => setSelectedImage(idx)}
-                      className={`flex-shrink-0 w-20 md:w-full aspect-[4/5] overflow-hidden transition-all duration-300 ${selectedImage === idx ? "opacity-100 ring-1 ring-[#C9A96E] ring-offset-2" : "opacity-50 hover:opacity-100"}`}
-                      style={{
-                        backgroundColor: "#f5f3f0",
-                        "--tw-ring-offset-color": "#fbf9f6",
-                      }}>
-                      <img
-                        src={img.url}
-                        alt={`View ${idx + 1}`}
-                        className="w-full h-full object-cover"
-                      />
-                    </button>
-                  ))}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
+          {/* ═══ LEFT: Image Gallery ═══ */}
+          <div>
+            {/* Main Image */}
+            <div className="aspect-[4/5] rounded-[1.5rem] overflow-hidden bg-surface-high img-zoom relative group">
+              {displayImages[selectedImage]?.url ? (
+                <img
+                  src={displayImages[selectedImage]?.url || displayImages[0].url}
+                  alt={product.title}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-surface-container">
+                  <p className="font-headline text-xl italic text-outline-variant">No Image</p>
                 </div>
               )}
-
-              {/* Main Image */}
-              <div
-                className="relative w-full aspect-4/5 overflow-hidden group"
-                style={{ backgroundColor: "#f5f3f0" }}>
-                <img
-                  src={
-                    displayImages[selectedImage]?.url || displayImages[0].url
-                  }
-                  alt={product.title}
-                  className="w-full h-full object-cover transition-opacity duration-500"
-                />
-                {displayImages.length > 1 && (
-                  <>
-                    <button
-                      onClick={() =>
-                        setSelectedImage((prev) =>
-                          prev === 0 ? displayImages.length - 1 : prev - 1,
-                        )
-                      }
-                      className="absolute left-4 lg:left-6 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 border"
-                      style={{
-                        backgroundColor: "rgba(251,249,246,0.8)",
-                        borderColor: "#e4e2df",
-                        color: "#1b1c1a",
-                      }}
-                      onMouseEnter={(e) =>
-                        (e.currentTarget.style.backgroundColor = "#fbf9f6")
-                      }
-                      onMouseLeave={(e) =>
-                        (e.currentTarget.style.backgroundColor =
-                          "rgba(251,249,246,0.8)")
-                      }
-                      aria-label="Previous image">
-                      <svg
-                        className="w-5 h-5"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24">
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="1.2"
-                          d="M15 19l-7-7 7-7"
-                        />
-                      </svg>
-                    </button>
-                    <button
-                      onClick={() =>
-                        setSelectedImage((prev) =>
-                          prev === displayImages.length - 1 ? 0 : prev + 1,
-                        )
-                      }
-                      className="absolute right-4 lg:right-6 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 border"
-                      style={{
-                        backgroundColor: "rgba(251,249,246,0.8)",
-                        borderColor: "#e4e2df",
-                        color: "#1b1c1a",
-                      }}
-                      onMouseEnter={(e) =>
-                        (e.currentTarget.style.backgroundColor = "#fbf9f6")
-                      }
-                      onMouseLeave={(e) =>
-                        (e.currentTarget.style.backgroundColor =
-                          "rgba(251,249,246,0.8)")
-                      }
-                      aria-label="Next image">
-                      <svg
-                        className="w-5 h-5"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24">
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="1.2"
-                          d="M9 5l7 7-7 7"
-                        />
-                      </svg>
-                    </button>
-                  </>
-                )}
-              </div>
+              {displayImages.length > 1 && (
+                <>
+                  <button
+                    onClick={() => setSelectedImage((prev) => prev === 0 ? displayImages.length - 1 : prev - 1)}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-surface-lowest/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all cursor-pointer border-none shadow-ambient"
+                    aria-label="Previous">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M15 19l-7-7 7-7" /></svg>
+                  </button>
+                  <button
+                    onClick={() => setSelectedImage((prev) => prev === displayImages.length - 1 ? 0 : prev + 1)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-surface-lowest/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all cursor-pointer border-none shadow-ambient"
+                    aria-label="Next">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M9 5l7 7-7 7" /></svg>
+                  </button>
+                </>
+              )}
             </div>
 
-            {/* ── RIGHT: Product Details ── */}
-            <div className="w-full lg:w-[30%] lg:sticky lg:top-24 flex flex-col pt-4">
-              <h1
-                className="text-4xl md:text-5xl lg:text-6xl font-light leading-[1.05] mb-6"
-                style={{
-                  fontFamily: "'Cormorant Garamond', serif",
-                  color: "#1b1c1a",
-                }}>
-                {product.title}
-              </h1>
-
-              <div className="mb-8">
-                <span
-                  className="text-sm uppercase tracking-[0.2em] font-medium"
-                  style={{ color: "#1b1c1a" }}>
-                  {displayPrice?.currency}{" "}
-                  {displayPrice?.amount?.toLocaleString()}
-                </span>
+            {/* Thumbnails */}
+            {displayImages.length > 1 && (
+              <div className="flex gap-3 mt-4">
+                {displayImages.map((img, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setSelectedImage(idx)}
+                    className={`w-16 h-20 rounded-xl overflow-hidden transition-all cursor-pointer border-2 ${
+                      selectedImage === idx
+                        ? "border-secondary opacity-100 shadow-ambient"
+                        : "border-transparent opacity-50 hover:opacity-100"
+                    }`}>
+                    <img src={img.url} alt={`View ${idx + 1}`} className="w-full h-full object-cover" />
+                  </button>
+                ))}
               </div>
+            )}
+          </div>
 
-              <div
-                className="h-px w-full mb-8"
-                style={{ backgroundColor: "#e4e2df" }}
-              />
+          {/* ═══ RIGHT: Product Info ═══ */}
+          <div className="flex flex-col">
+            {/* Title */}
+            <h1 className="font-headline text-4xl lg:text-5xl text-on-surface font-light leading-[1.1] mb-2">
+              The <em className="italic">{product.title}</em>
+            </h1>
 
-              {/* Options/Variants */}
-              {Object.entries(availableAttributes).map(([attrName, values]) => (
-                <div key={attrName} className="mb-6">
-                  <h3
-                    className="text-[10px] uppercase tracking-[0.24em] font-medium mb-3"
-                    style={{ color: "#C9A96E" }}>
-                    {attrName}
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {values.map((val) => {
-                      const isSelected = selectedAttributes[attrName] === val;
-                      return (
-                        <button
-                          key={val}
-                          onClick={() => handleAttributeChange(attrName, val)}
-                          className={`px-4 py-2 text-[11px] uppercase tracking-[0.15em] font-medium transition-all duration-300 border ${isSelected ? "border-[#1b1c1a] bg-[#1b1c1a] text-[#fbf9f6]" : "border-[#d0c5b5] text-[#1b1c1a] hover:border-[#1b1c1a]"}`}
-                          style={
-                            isSelected ? {} : { backgroundColor: "transparent" }
-                          }>
-                          {val}
-                        </button>
-                      );
-                    })}
-                  </div>
+            {/* Price */}
+            <p className="font-headline text-xl text-on-surface mb-8">
+              {displayPrice?.currency} {displayPrice?.amount?.toLocaleString()}
+            </p>
+
+            {/* Narrative Card */}
+            <div className="bg-surface-container rounded-[1.5rem] p-6 mb-8">
+              <h3 className="font-headline text-lg italic text-on-surface mb-3">
+                The Narrative
+              </h3>
+              <p className="text-sm text-on-surface-variant font-light leading-relaxed">
+                {product.description}
+              </p>
+            </div>
+
+            {/* Variant Selectors */}
+            {Object.entries(availableAttributes).map(([attrName, values]) => (
+              <div key={attrName} className="mb-6">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="label-atelier !mb-0">{attrName}</h3>
+                  {attrName.toLowerCase() === "size" && (
+                    <button className="text-xs text-on-surface-variant hover:text-secondary transition-colors bg-transparent border-none cursor-pointer underline underline-offset-4">
+                      Size Guide
+                    </button>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {values.map((val) => {
+                    const isSelected = selectedAttributes[attrName] === val;
+                    return (
+                      <button
+                        key={val}
+                        onClick={() => handleAttributeChange(attrName, val)}
+                        className={`w-12 h-12 rounded-full text-xs font-medium uppercase tracking-wider transition-all cursor-pointer border ${
+                          isSelected
+                            ? "bg-primary text-on-primary border-primary"
+                            : "bg-transparent text-on-surface border-outline-variant hover:border-primary"
+                        }`}>
+                        {val}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+
+            {/* Stock */}
+            {activeVariant && activeVariant.stock !== undefined && (
+              <p className={`text-xs uppercase tracking-wider font-medium mb-6 ${activeVariant.stock > 0 ? "text-secondary" : "text-error"}`}>
+                {activeVariant.stock > 0 ? `${activeVariant.stock} in stock` : "Out of stock"}
+              </p>
+            )}
+
+            {/* Add to Bag Button */}
+            <button
+              className="btn-pill btn-primary w-full text-sm py-4 mb-4"
+              onClick={() => {
+                if (activeVariant) {
+                  handleAddToCart({ productId: product._id, variantId: activeVariant._id });
+                }
+              }}>
+              Add to Bag →
+            </button>
+
+            {/* Accordion */}
+            <div className="mt-4 space-y-0">
+              {accordionItems.map((item) => (
+                <div key={item.id} className="border-t border-outline-variant/20">
+                  <button
+                    onClick={() => setOpenAccordion(openAccordion === item.id ? null : item.id)}
+                    className="w-full flex items-center justify-between py-5 text-left bg-transparent border-none cursor-pointer">
+                    <span className="font-headline text-base italic text-on-surface">{item.title}</span>
+                    <span className="text-outline text-lg">{openAccordion === item.id ? "−" : "+"}</span>
+                  </button>
+                  {openAccordion === item.id && (
+                    <div className="pb-5">
+                      <p className="text-sm text-on-surface-variant font-light leading-relaxed">
+                        {item.content}
+                      </p>
+                    </div>
+                  )}
                 </div>
               ))}
-
-              {/* Stock Information */}
-              {activeVariant && activeVariant.stock !== undefined && (
-                <div className="mb-6">
-                  <span
-                    className={`text-[10px] uppercase tracking-[0.2em] font-medium ${activeVariant.stock > 0 ? "text-green-700" : "text-red-700"}`}>
-                    {activeVariant.stock > 0
-                      ? `${activeVariant.stock} in stock`
-                      : "Out of stock"}
-                  </span>
-                </div>
-              )}
-
-              <div className="mb-12">
-                <h3
-                  className="text-[10px] uppercase tracking-[0.24em] font-medium mb-4"
-                  style={{ color: "#C9A96E" }}>
-                  The Details
-                </h3>
-                <p
-                  className="text-sm leading-relaxed"
-                  style={{ color: "#7A6E63" }}>
-                  {product.description}
-                </p>
-              </div>
-
-              {/* Actions */}
-              <div className="flex flex-col gap-4 mt-auto">
-                <button
-                  className="w-full py-4 text-[11px] uppercase tracking-[0.25em] font-medium transition-all duration-300"
-                  style={{
-                    backgroundColor: "#1b1c1a",
-                    color: "#fbf9f6",
-                    fontFamily: "'Inter', sans-serif",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = "#C9A96E";
-                    e.currentTarget.style.color = "#1b1c1a";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = "#1b1c1a";
-                    e.currentTarget.style.color = "#fbf9f6";
-                  }}
-                  onClick={() => {
-                    handleAddItem({
-                      productId: product._id,
-                      variantId: activeVariant._id,
-                    });
-                  }}>
-                  Add to Cart
-                </button>
-
-                <button
-                  className="w-full py-4 text-[11px] uppercase tracking-[0.25em] font-medium transition-all duration-300 border"
-                  style={{
-                    backgroundColor: "transparent",
-                    borderColor: "#d0c5b5",
-                    color: "#1b1c1a",
-                    fontFamily: "'Inter', sans-serif",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = "#C9A96E";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = "#d0c5b5";
-                  }}>
-                  Buy Now
-                </button>
-              </div>
-
-              {/* Extra elegant details */}
-              <div
-                className="mt-14 space-y-4 text-[10px] uppercase tracking-[0.1em]"
-                style={{ color: "#B5ADA3" }}>
-                <div
-                  className="flex justify-between border-b pb-3"
-                  style={{ borderColor: "#e4e2df" }}>
-                  <span>Shipping</span>
-                  <span>Complimentary over INR 15,000</span>
-                </div>
-                <div
-                  className="flex justify-between border-b pb-3"
-                  style={{ borderColor: "#e4e2df" }}>
-                  <span>Returns</span>
-                  <span>Within 14 days of delivery</span>
-                </div>
-                <div
-                  className="flex justify-between border-b pb-3"
-                  style={{ borderColor: "#e4e2df" }}>
-                  <span>Authenticity</span>
-                  <span>100% Guaranteed</span>
-                </div>
-              </div>
             </div>
           </div>
         </div>
       </div>
-    </>
+
+      {/* Footer */}
+      <footer className="py-12 px-6 lg:px-8 bg-surface border-t border-outline-variant/10">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+          <span className="font-headline text-lg text-on-surface">
+            <em className="italic">MAISON</em><span className="font-light not-italic">elle</span>
+          </span>
+          <div className="flex items-center gap-6">
+            <a href="#" className="text-xs text-outline no-underline uppercase tracking-wider hover:text-secondary transition-colors">Privacy</a>
+            <a href="#" className="text-xs text-outline no-underline uppercase tracking-wider hover:text-secondary transition-colors">Terms</a>
+            <a href="#" className="text-xs text-outline no-underline uppercase tracking-wider hover:text-secondary transition-colors">Shipping</a>
+            <a href="#" className="text-xs text-outline no-underline uppercase tracking-wider hover:text-secondary transition-colors">Contact</a>
+          </div>
+          <p className="text-[0.6rem] text-outline uppercase tracking-[0.1em]">© 2024 MAISONelle. All rights reserved.</p>
+        </div>
+      </footer>
+    </div>
   );
 };
 

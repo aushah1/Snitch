@@ -6,38 +6,53 @@ import Navbar from "../../products/components/Navbar";
 
 const Cart = () => {
   const navigate = useNavigate();
-  const { handleGetCart } = useCart();
+  const {
+    handleGetCart,
+    handleRemoveFromCart,
+    handleCalculateCartTotal,
+    handleIncreaseQuantity,
+    handleDecreaseQuantity,
+  } = useCart();
   const cartItems = useSelector((state) => state.cart.items);
   const loading = useSelector((state) => state.cart.loading);
+  const cartTotal = useSelector((state) => state.cart.cartTotal);
   const [fetchError, setFetchError] = useState(null);
 
   useEffect(() => {
     const fetchCart = async () => {
       try {
         setFetchError(null);
-        await handleGetCart();
+        const cart = await handleGetCart();
+        if (cart) {
+          await handleCalculateCartTotal(cart);
+        }
       } catch (err) {
         setFetchError("Unable to load your cart.");
         console.error(err);
       }
     };
     fetchCart();
-  }, [handleGetCart]);
+  }, [handleGetCart, handleCalculateCartTotal]);
 
   const subtotal = cartItems.reduce((sum, item) => {
-    const price = item.variant?.price?.amount || item.product?.price?.amount || 0;
+    const price =
+      item.variant?.price?.amount || item.product?.price?.amount || 0;
     return sum + price * (item.quantity || 1);
   }, 0);
 
-  const currency = cartItems[0]?.variant?.price?.currency || cartItems[0]?.product?.price?.currency || "INR";
+  const currency =
+    cartItems[0]?.variant?.price?.currency ||
+    cartItems[0]?.product?.price?.currency ||
+    "INR";
 
-  const currencySymbol = {
-    INR: "₹",
-    USD: "$",
-    EUR: "€",
-    GBP: "£",
-    JPY: "¥",
-  }[currency] || currency;
+  const currencySymbol =
+    {
+      INR: "₹",
+      USD: "$",
+      EUR: "€",
+      GBP: "£",
+      JPY: "¥",
+    }[currency] || currency;
 
   // Loading
   if (loading && cartItems.length === 0) {
@@ -51,7 +66,9 @@ const Cart = () => {
           </div>
           <div className="space-y-6">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="flex gap-6 bg-surface-lowest rounded-2xl p-6 shadow-ambient">
+              <div
+                key={i}
+                className="flex gap-6 bg-surface-lowest rounded-2xl p-6 shadow-ambient">
                 <div className="w-28 h-28 shimmer rounded-xl shrink-0" />
                 <div className="flex-1 space-y-3">
                   <div className="h-5 shimmer rounded-full w-1/2" />
@@ -99,7 +116,16 @@ const Cart = () => {
             <div className="text-center max-w-sm">
               {/* Cart Icon */}
               <div className="w-20 h-20 rounded-full bg-surface-high flex items-center justify-center mx-auto mb-6">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-outline-variant">
+                <svg
+                  width="32"
+                  height="32"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="text-outline-variant">
                   <circle cx="9" cy="21" r="1" />
                   <circle cx="20" cy="21" r="1" />
                   <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
@@ -109,7 +135,8 @@ const Cart = () => {
                 Your Bag is Empty
               </p>
               <p className="text-sm text-outline font-light leading-relaxed mb-8">
-                Discover our curated collection and find pieces that speak to you.
+                Discover our curated collection and find pieces that speak to
+                you.
               </p>
               <button
                 onClick={() => navigate("/")}
@@ -125,10 +152,16 @@ const Cart = () => {
               {cartItems.map((item, index) => {
                 const product = item.product || {};
                 const variant = item.variant || {};
-                const price = variant.price?.amount || product.price?.amount || 0;
-                const itemCurrency = variant.price?.currency || product.price?.currency || "INR";
-                const imageUrl = variant.images?.[0]?.url || product.images?.[0]?.url;
-                const sym = { INR: "₹", USD: "$", EUR: "€", GBP: "£", JPY: "¥" }[itemCurrency] || itemCurrency;
+                const price =
+                  variant.price?.amount || product.price?.amount || 0;
+                const itemCurrency =
+                  variant.price?.currency || product.price?.currency || "INR";
+                const imageUrl =
+                  variant.images?.[0]?.url || product.images?.[0]?.url;
+                const sym =
+                  { INR: "₹", USD: "$", EUR: "€", GBP: "£", JPY: "¥" }[
+                    itemCurrency
+                  ] || itemCurrency;
 
                 return (
                   <div
@@ -138,7 +171,9 @@ const Cart = () => {
                       {/* Image */}
                       <div
                         className="w-24 h-24 md:w-28 md:h-28 rounded-xl overflow-hidden bg-surface-high shrink-0 cursor-pointer img-zoom"
-                        onClick={() => product._id && navigate(`/products/${product._id}`)}>
+                        onClick={() =>
+                          product._id && navigate(`/products/${product._id}`)
+                        }>
                         {imageUrl ? (
                           <img
                             src={imageUrl}
@@ -159,36 +194,72 @@ const Cart = () => {
                         <div>
                           <h3
                             className="font-headline text-lg text-on-surface line-clamp-1 cursor-pointer hover:text-secondary transition-colors"
-                            onClick={() => product._id && navigate(`/products/${product._id}`)}>
+                            onClick={() =>
+                              product._id &&
+                              navigate(`/products/${product._id}`)
+                            }>
                             {product.title || "Untitled Product"}
                           </h3>
                           {/* Variant attributes */}
-                          {variant.attributes && Object.keys(variant.attributes).length > 0 && (
-                            <div className="flex flex-wrap gap-2 mt-2">
-                              {Object.entries(variant.attributes).map(([key, value]) => (
-                                <span
-                                  key={key}
-                                  className="text-[0.6rem] uppercase tracking-wider bg-surface-high text-on-surface-variant rounded-full px-3 py-1">
-                                  {key}: {value}
-                                </span>
-                              ))}
-                            </div>
-                          )}
+                          {variant.attributes &&
+                            Object.keys(variant.attributes).length > 0 && (
+                              <div className="flex flex-wrap gap-2 mt-2">
+                                {Object.entries(variant.attributes).map(
+                                  ([key, value]) => (
+                                    <span
+                                      key={key}
+                                      className="text-[0.6rem] uppercase tracking-wider bg-surface-high text-on-surface-variant rounded-full px-3 py-1">
+                                      {key}: {value}
+                                    </span>
+                                  ),
+                                )}
+                              </div>
+                            )}
                         </div>
 
                         {/* Bottom row */}
                         <div className="flex items-end justify-between mt-4">
                           {/* Quantity */}
                           <div className="flex items-center gap-1">
-                            <span className="text-[0.6rem] uppercase tracking-wider text-outline mr-2">Qty</span>
+                            <span className="text-[0.6rem] uppercase tracking-wider text-outline mr-2">
+                              Qty
+                            </span>
                             <div className="flex items-center bg-surface-high rounded-full overflow-hidden">
-                              <button className="w-8 h-8 flex items-center justify-center text-on-surface-variant hover:bg-surface-highest transition-colors border-none bg-transparent cursor-pointer text-sm">
+                              <button
+                                onClick={async () => {
+                                  try {
+                                    await handleDecreaseQuantity({
+                                      productId: item.product._id,
+                                      variantId: item.variant,
+                                    });
+                                  } catch (err) {
+                                    console.error(
+                                      "Failed to decrease quantity:",
+                                      err,
+                                    );
+                                  }
+                                }}
+                                className="w-8 h-8 flex items-center justify-center text-on-surface-variant hover:bg-surface-highest transition-colors border-none bg-transparent cursor-pointer text-sm">
                                 −
                               </button>
                               <span className="w-8 h-8 flex items-center justify-center text-sm font-medium text-on-surface">
                                 {item.quantity || 1}
                               </span>
-                              <button className="w-8 h-8 flex items-center justify-center text-on-surface-variant hover:bg-surface-highest transition-colors border-none bg-transparent cursor-pointer text-sm">
+                              <button
+                                onClick={async () => {
+                                  try {
+                                    await handleIncreaseQuantity({
+                                      productId: item.product._id,
+                                      variantId: item.variant,
+                                    });
+                                  } catch (err) {
+                                    console.error(
+                                      "Failed to increase quantity:",
+                                      err,
+                                    );
+                                  }
+                                }}
+                                className="w-8 h-8 flex items-center justify-center text-on-surface-variant hover:bg-surface-highest transition-colors border-none bg-transparent cursor-pointer text-sm">
                                 +
                               </button>
                             </div>
@@ -197,11 +268,13 @@ const Cart = () => {
                           {/* Price */}
                           <div className="text-right">
                             <span className="font-headline text-xl text-on-surface">
-                              {sym}{(price * (item.quantity || 1)).toLocaleString()}
+                              {sym}
+                              {(price * (item.quantity || 1)).toLocaleString()}
                             </span>
                             {(item.quantity || 1) > 1 && (
                               <p className="text-[0.6rem] text-outline mt-0.5">
-                                {sym}{price.toLocaleString()} each
+                                {sym}
+                                {price.toLocaleString()} each
                               </p>
                             )}
                           </div>
@@ -209,8 +282,26 @@ const Cart = () => {
                       </div>
 
                       {/* Remove */}
-                      <button className="self-start w-8 h-8 flex items-center justify-center rounded-full hover:bg-error-container/30 text-outline hover:text-error transition-all cursor-pointer border-none bg-transparent opacity-0 group-hover:opacity-100 shrink-0">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                      <button
+                        onClick={async () => {
+                          try {
+                            await handleRemoveFromCart({
+                              productId: item.product._id,
+                              variantId: item.variant,
+                            });
+                          } catch (err) {
+                            console.error("Failed to remove item:", err);
+                          }
+                        }}
+                        className="self-start w-8 h-8 flex items-center justify-center rounded-full hover:bg-error-container/30 text-outline hover:text-error transition-all cursor-pointer border-none bg-transparent opacity-0 group-hover:opacity-100 shrink-0">
+                        <svg
+                          width="14"
+                          height="14"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round">
                           <path d="M18 6L6 18M6 6l12 12" />
                         </svg>
                       </button>
@@ -231,31 +322,49 @@ const Cart = () => {
                 <div className="space-y-4 mb-6">
                   <div className="flex justify-between text-sm">
                     <span className="text-on-surface-variant font-light">
-                      Subtotal ({cartItems.length} {cartItems.length === 1 ? "item" : "items"})
+                      Subtotal ({cartTotal?.itemCount || cartItems.length}{" "}
+                      {(cartTotal?.itemCount || cartItems.length) === 1
+                        ? "item"
+                        : "items"}
+                      )
                     </span>
                     <span className="text-on-surface font-medium">
-                      {currencySymbol}{subtotal.toLocaleString()}
+                      {currencySymbol}
+                      {(cartTotal?.subtotal || subtotal).toLocaleString()}
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-on-surface-variant font-light">Shipping</span>
-                    <span className="text-secondary font-medium text-xs uppercase tracking-wider">Free</span>
+                    <span className="text-on-surface-variant font-light">
+                      Shipping
+                    </span>
+                    <span className="text-secondary font-medium text-xs uppercase tracking-wider">
+                      Free
+                    </span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-on-surface-variant font-light">Tax</span>
-                    <span className="text-on-surface-variant font-light text-xs">Calculated at checkout</span>
+                    <span className="text-on-surface-variant font-light">
+                      Tax
+                    </span>
+                    <span className="text-on-surface-variant font-light text-xs">
+                      Calculated at checkout
+                    </span>
                   </div>
                 </div>
 
                 <div className="tonal-divider !my-5" />
 
                 <div className="flex justify-between items-baseline mb-8">
-                  <span className="text-sm font-medium text-on-surface uppercase tracking-wider">Total</span>
+                  <span className="text-sm font-medium text-on-surface uppercase tracking-wider">
+                    Total
+                  </span>
                   <div className="text-right">
                     <span className="font-headline text-3xl text-on-surface">
-                      {currencySymbol}{subtotal.toLocaleString()}
+                      {currencySymbol}
+                      {(cartTotal?.total || subtotal).toLocaleString()}
                     </span>
-                    <p className="text-[0.6rem] text-outline uppercase tracking-wider mt-1">{currency}</p>
+                    <p className="text-[0.6rem] text-outline uppercase tracking-wider mt-1">
+                      {cartTotal?.currency || currency}
+                    </p>
                   </div>
                 </div>
 
@@ -271,7 +380,14 @@ const Cart = () => {
                 {/* Trust badges */}
                 <div className="mt-8 flex items-center justify-center gap-4">
                   <div className="flex items-center gap-1.5 text-[0.55rem] uppercase tracking-wider text-outline">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-secondary">
+                    <svg
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      className="text-secondary">
                       <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
                       <path d="M7 11V7a5 5 0 0110 0v4" />
                     </svg>
@@ -279,14 +395,28 @@ const Cart = () => {
                   </div>
                   <div className="w-px h-3 bg-outline-variant/30" />
                   <div className="flex items-center gap-1.5 text-[0.55rem] uppercase tracking-wider text-outline">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-secondary">
+                    <svg
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      className="text-secondary">
                       <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
                     </svg>
                     Authentic
                   </div>
                   <div className="w-px h-3 bg-outline-variant/30" />
                   <div className="flex items-center gap-1.5 text-[0.55rem] uppercase tracking-wider text-outline">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-secondary">
+                    <svg
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      className="text-secondary">
                       <polyline points="20 12 20 22 4 22 4 12" />
                       <rect x="2" y="7" width="20" height="5" />
                       <line x1="12" y1="22" x2="12" y2="7" />

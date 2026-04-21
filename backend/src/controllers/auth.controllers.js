@@ -4,7 +4,7 @@ import config from "../config/config.js";
 
 const validateToken = (user, res, message) => {
   const token = jwt.sign({ id: user._id }, config.JWT_SECRET, {
-    expiresIn: "1h",
+    expiresIn: "8h",
   });
   res.cookie("token", token);
   res.status(200).json({
