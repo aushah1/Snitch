@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const productApi = axios.create({
-  baseURL: "/api/products",
+  baseURL: "https://snitch-yhyl.onrender.com/api/products",
   withCredentials: true,
 });
 
